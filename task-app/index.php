@@ -27,7 +27,7 @@ foreach ($tasks as $task) {
     echo "\n";
 }
 
-function countTasks(array $tasks): int
+function countTotalTasks(array $tasks): int
 {
     $tasksCount = 0;
     foreach ($tasks as $task) {
@@ -35,7 +35,7 @@ function countTasks(array $tasks): int
     }
     return $tasksCount;
 }
-function countCompleted(array $tasks): int
+function countCompletedTasks(array $tasks): int
 {
     $completed = 0;
     foreach ($tasks as $task) {
@@ -45,7 +45,7 @@ function countCompleted(array $tasks): int
     }
     return $completed;
 }
-function countPending(array $tasks): int
+function countPendingTasks(array $tasks): int
 {
     $pending = 0;
     foreach ($tasks as $task) {
@@ -57,9 +57,9 @@ function countPending(array $tasks): int
 }
 echo "\n";
 
-$tasksCount = countTasks($tasks);
-$completed = countCompleted($tasks);
-$pending = countPending($tasks);
+$tasksCount = countTotalTasks($tasks);
+$completed = countCompletedTasks($tasks);
+$pending = countPendingTasks($tasks);
 echo "Total tasks: $tasksCount \n";
 echo "Completed: $completed \n";
 echo "Pending: $pending \n";
