@@ -39,7 +39,7 @@ function countCompletedTasks(array $tasks): int
 {
     $completed = 0;
     foreach ($tasks as $task) {
-        if($task['completed'] === true){
+        if ($task['completed'] === true) {
             $completed++;
         }
     }
@@ -49,7 +49,7 @@ function countPendingTasks(array $tasks): int
 {
     $pending = 0;
     foreach ($tasks as $task) {
-       if($task['completed'] !== true){
+        if ($task['completed'] !== true) {
             $pending++;
         }
     }
@@ -64,8 +64,13 @@ echo "Total tasks: $tasksCount \n";
 echo "Completed: $completed \n";
 echo "Pending: $pending \n";
 
-require_once 'Task.php';
-$task = new Task("Learn Laravel", false);
-echo $task->getStatus();
+require_once 'ImportantTask.php';
+require_once 'EmailNotification.php';
+$task = new ImportantTask("Learn Laravel", false);
+echo $task->getTitle() . " \n";
+echo $task->getStatus() . " \n";
 $task->complete();
-echo $task->getStatus();
+echo $task->getStatus() . "\n";
+
+$notification = new EmailNofication();
+$notification->notify();
