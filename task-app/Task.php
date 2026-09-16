@@ -2,7 +2,7 @@
 class Task
 {
     public string $title;
-    public bool $completed;
+    private bool $completed;
 
     public function __construct(string $title, bool $completed)
     {
@@ -19,8 +19,6 @@ class Task
 
     public function complete(): void
     {
-        if ($this->completed === false) {
-            $this->completed = true;
-        }
+        $this->completed = true;
     }
 }
