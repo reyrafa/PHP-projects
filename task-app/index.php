@@ -63,3 +63,9 @@ $pending = countPendingTasks($tasks);
 echo "Total tasks: $tasksCount \n";
 echo "Completed: $completed \n";
 echo "Pending: $pending \n";
+
+require_once 'Task.php';
+$task = new Task("Learn Laravel", false);
+echo $task->getStatus();
+$task->complete();
+echo $task->getStatus();
