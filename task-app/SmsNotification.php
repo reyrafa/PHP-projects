@@ -1,9 +1,9 @@
 <?php
 require_once('Notifiable.php');
-class EmailNotification implements Notifiable
+class SmsNotification implements Notifiable
 {
     public function notify(): void
     {
-        echo "Sending email";
+        echo "Sending Sms";
     }
 }

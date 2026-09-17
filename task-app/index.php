@@ -66,11 +66,22 @@ echo "Pending: $pending \n";
 
 require_once 'ImportantTask.php';
 require_once 'EmailNotification.php';
+require_once 'Notifiable.php';
+require_once 'SmsNotification.php';
 $task = new ImportantTask("Learn Laravel", false);
 echo $task->getTitle() . " \n";
 echo $task->getStatus() . " \n";
 $task->complete();
 echo $task->getStatus() . "\n";
 
-$notification = new EmailNofication();
+$notification = new EmailNotification();
 $notification->notify();
+
+function sendNotification(Notifiable $notification): void
+{
+    $notification->notify();
+}
+$email = new EmailNotification();
+sendNotification($email);
+$sms = new SmsNotification();
+sendNotification($sms);
