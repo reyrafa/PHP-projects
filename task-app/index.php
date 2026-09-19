@@ -1,4 +1,7 @@
 <?php
+
+use Models\User;
+
 $tasks = [
     [
         "title" => "Learn PHP",
@@ -85,3 +88,20 @@ $email = new EmailNotification();
 sendNotification($email);
 $sms = new SmsNotification();
 sendNotification($sms);
+echo "\n";
+
+require_once('PaypalPayment.php');
+require_once('StripePayment.php');
+require_once('PaymentService.php');
+$paypal = new PaypalPayment();
+$service = new PaymentService($paypal);
+$service->pay(500);
+echo " \n";
+$stripe = new StripePayment();
+$service = new PaymentService($stripe);
+$service->pay(500);
+
+
+$user = new User();
+echo $user->sayHello();
+
