@@ -5,7 +5,10 @@
     <ul>
         @foreach ($tasks as $task)
             <li>
-                {{ $task->title }}
+                <a href="{{ route('tasks.show', $task) }}">
+                    {{ $task->title }}
+                </a>
+
 
                 @if ($task->completed)
                     - Completed

@@ -27,4 +27,10 @@ class TaskController extends Controller
         Task::create($validated);
         return redirect('/tasks');
     }
+    public function show(Task $task)
+    {
+        return view('tasks.show', [
+            'task' => $task
+        ]);
+    }
 }
