@@ -5,9 +5,9 @@
     <ul>
         @foreach ($tasks as $task)
             <li>
-                {{ $task['title'] }}
+                {{ $task->title }}
 
-                @if ($task['completed'])
+                @if ($task->completed)
                     - Completed
                 @else
                     - Pending

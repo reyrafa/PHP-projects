@@ -2,32 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTaskRequest;
+use App\Models\Task;
+
 
 class TaskController extends Controller
 {
     public function index()
     {
-        $tasks = [
-            [
-                'title' => 'Learn PHP',
-                'completed' => true,
-            ],
-            [
-                'title' => 'Learn Laravel',
-                'completed' => true,
-            ],
-            [
-                'title' => 'Build API',
-                'completed' => false,
-            ],
-            [
-                'title' => 'Learn Docker',
-                'completed' => false,
-            ],
-        ];
+        $tasks = Task::all();
         return view('tasks.index', [
             'tasks' => $tasks,
-            'totalTasks' => count($tasks)
+            'totalTasks' => $tasks->count()
         ]);
     }
     public function create()
@@ -35,7 +21,10 @@ class TaskController extends Controller
         return view('tasks.create');
     }
 
-    public function store(){
-        dd(request()->all());
+    public function store(StoreTaskRequest $request)
+    {
+        $validated = $request->validated();
+        Task::create($validated);
+        return redirect('/tasks');
     }
 }
