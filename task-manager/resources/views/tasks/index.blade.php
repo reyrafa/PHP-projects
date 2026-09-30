@@ -6,7 +6,7 @@
         @foreach ($tasks as $task)
             <li>
                 <a href="{{ route('tasks.show', $task) }}">
-                    {{ $task->title }}
+                    {{ $task->title }} - {{ $task->user?->name }}
                 </a>
 
 
@@ -17,6 +17,7 @@
                 @endif
             </li>
         @endforeach
+        {{ $tasks->links() }}
         <p>Total Tasks: {{ $totalTasks }}</p>
     </ul>
 @endsection
