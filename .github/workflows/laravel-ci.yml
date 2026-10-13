@@ -1,0 +1,56 @@
+name: Task Manager ci
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  laravel-checks:
+    name: Test Laravel and build frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: task-manager
+
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ":memory:"
+      CACHE_STORE: array
+      CACHE_DRIVER: array
+      SESSION_DRIVER: array
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_sqlite, sqlite3
+          coverage: none
+      
+      - name: Prepare Environment
+        run: cp .env.example .env
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: Install Frontend dependencies
+        run: npm ci
+
+      - name: Install frontend asset
+        run: npm run build
+
+      - name: Run Laravel Test
+        run: php artisan test
