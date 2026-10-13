@@ -4,7 +4,9 @@
 
 <body>
     <header>Task Manager</header>
-
+    @if (session('status'))
+        <p>{{ session('status') }}</p>
+    @endif
     <main>
         @yield('content')
     </main>

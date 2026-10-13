@@ -5,15 +5,26 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
+
+
 
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request): View
     {
-        $tasks = Task::with('user')
+        $tasks = $request->user()
+            ->tasks()
+            ->with('user')
+            ->where('completed', false)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+
         return view('tasks.index', [
             'tasks' => $tasks,
             'totalTasks' => $tasks->count()
@@ -24,33 +35,35 @@ class TaskController extends Controller
         return view('tasks.create');
     }
 
-    public function store(StoreTaskRequest $request)
+    public function store(StoreTaskRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        Task::create($validated);
-        return redirect('/tasks');
+        $request->user()
+            ->tasks()
+            ->create($validated);
+        return redirect('/tasks')->with('status', 'Task created successfully.');
     }
-    public function show(Task $task)
+    public function show(Task $task): View
     {
         return view('tasks.show', [
             'task' => $task
         ]);
     }
-    public function edit(Task $task)
+    public function edit(Task $task): View
     {
         return view('tasks.edit', [
             'task' => $task
         ]);
     }
-    public function update(UpdateTaskRequest $request, Task $task)
+    public function update(UpdateTaskRequest $request, Task $task): RedirectResponse
     {
         $validated = $request->validated();
         $task->update($validated);
-        return redirect()->route('tasks.show', $task);
+        return redirect()->route('tasks.show', $task)->with('status', 'Task updated successfully.');
     }
-    public function delete(Task $task)
+    public function delete(Task $task): RedirectResponse
     {
         $task->delete();
-        return redirect()->route('tasks.index');
+        return redirect()->route('tasks.index')->with('status', 'Task deleted successfully.');
     }
 }
