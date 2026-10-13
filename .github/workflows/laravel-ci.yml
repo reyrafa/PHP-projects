@@ -9,6 +9,9 @@ jobs:
   laravel-checks:
     name: Test Laravel and build frontend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: task-manager
 
     env:
       APP_ENV: testing
