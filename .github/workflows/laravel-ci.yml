@@ -10,6 +10,9 @@ jobs:
   docker-ci:
     name: Build and test Laravel in Docker
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: task-manager
 
     env:
       WWWUSER: 1001
