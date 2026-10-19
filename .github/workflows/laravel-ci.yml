@@ -1,4 +1,5 @@
-name: Task Manager ci
+
+name: Laravel CI with Docker
 
 on: [push, pull_request]
 
@@ -6,51 +7,93 @@ permissions:
   contents: read
 
 jobs:
-  laravel-checks:
-    name: Test Laravel and build frontend
+  docker-ci:
+    name: Build and test Laravel in Docker
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: task-manager
 
     env:
-      APP_ENV: testing
-      DB_CONNECTION: sqlite
-      DB_DATABASE: ":memory:"
-      CACHE_STORE: array
-      CACHE_DRIVER: array
-      SESSION_DRIVER: array
-    
+      WWWUSER: 1001
+      WWWGROUP: 1001
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.3"
-          extensions: mbstring, pdo_sqlite, sqlite3
-          coverage: none
-      
-      - name: Prepare Environment
-        run: cp .env.example .env
+      - name: Prepare CI environment
+        shell: bash
+        run: |
+          cp .env.example .env
 
-      - name: Install PHP dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+          set_env() {
+            local key="$1"
+            local value="$2"
+
+            if grep -q "^${key}=" .env; then
+              sed -i "s|^${key}=.*|${key}=${value}|" .env
+            else
+              printf '%s=%s\n' "$key" "$value" >> .env
+            fi
+          }
+
+          set_env APP_KEY ""
+          set_env APP_ENV testing
+          set_env DB_CONNECTION mysql
+          set_env DB_HOST mysql
+          set_env DB_PORT 3306
+          set_env DB_DATABASE task_manager
+          set_env DB_USERNAME sail
+          set_env DB_PASSWORD password
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build custom Sail image
+        run: docker compose build laravel.test
+
+      - name: Install PHP dependencies in Docker
+        run: >
+          docker compose run --rm --no-deps laravel.test
+          composer install --no-interaction --prefer-dist --no-progress
 
       - name: Generate application key
-        run: php artisan key:generate
+        run: >
+          docker compose run --rm --no-deps laravel.test
+          php artisan key:generate --force
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: "22"
+      - name: Install frontend dependencies
+        run: >
+          docker compose run --rm --no-deps laravel.test npm ci
 
-      - name: Install Frontend dependencies
-        run: npm ci
+      - name: Build frontend assets
+        run: >
+          docker compose run --rm --no-deps laravel.test
+          npm run build
 
-      - name: Install frontend asset
-        run: npm run build
+      - name: Start MySQL
+        run: docker compose up -d mysql
 
-      - name: Run Laravel Test
-        run: php artisan test
+      - name: Wait for MySQL
+        shell: bash
+        run: |
+         for attempt in $(seq 1 60); do
+            if docker compose exec -T mysql \
+              mysql -h127.0.0.1 -u"sail" -p"password" -e "SELECT 1" >/dev/null 2>&1; then
+              echo "MySQL is ready."
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs mysql
+          exit 1
+
+      - name: Run Laravel tests in Docker
+        run: >
+          docker compose run --rm laravel.test
+          php artisan test
+
+      - name: Stop Docker services
+        if: always()
+        run: docker compose down --remove-orphans
