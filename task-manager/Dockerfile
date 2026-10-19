@@ -18,6 +18,7 @@ FROM dunglas/frankenphp:1-php8.4-bookworm AS php-base
 
 RUN install-php-extensions \
     pdo_mysql \
+    pdo_pgsql \
     bcmath \
     gd \
     intl \
@@ -60,11 +61,17 @@ WORKDIR /app
 ENV APP_ENV=production \
     APP_DEBUG=false \
     LOG_CHANNEL=stderr \
-    SERVER_NAME=:80
+    SERVER_NAME=:10000
 
 COPY --from=vendor /app /app
 
 COPY --from=frontend /app/public/build /app/public/build
+
+COPY docker/render-start.sh /usr/local/bin/render-start
+
+RUN chmod +x /usr/local/bin/render-start
+
+CMD ["/usr/local/bin/render-start"]
 
 RUN mkdir -p \
     storage/framework/cache/data \
@@ -74,4 +81,4 @@ RUN mkdir -p \
     bootstrap/cache \
     && chmod -R ug+rwX storage bootstrap/cache
 
-EXPOSE 80
+EXPOSE 10000
