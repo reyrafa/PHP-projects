@@ -71,7 +71,6 @@ COPY docker/render-start.sh /usr/local/bin/render-start
 
 RUN chmod +x /usr/local/bin/render-start
 
-CMD ["/usr/local/bin/render-start"]
 
 RUN mkdir -p \
     storage/framework/cache/data \
@@ -82,3 +81,4 @@ RUN mkdir -p \
     && chmod -R ug+rwX storage bootstrap/cache
 
 EXPOSE 10000
+CMD ["/usr/local/bin/render-start"]
