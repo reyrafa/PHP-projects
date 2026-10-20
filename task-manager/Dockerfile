@@ -70,7 +70,11 @@ COPY --from=frontend /app/public/build /app/public/build
 COPY docker/render-start.sh /usr/local/bin/render-start
 
 RUN chmod +x /usr/local/bin/render-start
-
+# Render blocks file capabilities; port 10000 doesn't need them
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libcap2-bin \
+    && rm -rf /var/lib/apt/lists/* \
+    && setcap -r /usr/local/bin/frankenphp
 
 RUN mkdir -p \
     storage/framework/cache/data \
