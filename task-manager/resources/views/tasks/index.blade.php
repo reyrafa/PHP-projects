@@ -23,6 +23,8 @@
         @endforeach
 
 
-        <p>Total Tasks: {{ $totalTasks }}</p>
+        <p>Total Tasks: {{ $summary['total'] }}</p>
+        <p>Total Pending Tasks: {{ $summary['pending'] }}</p>
+        <p>Total Completed Tasks: {{ $summary['completed'] }}</p>
     </ul>
 @endsection

@@ -1,12 +1,12 @@
 services:
     laravel.test:
         build:
-            context: './docker/8.5'
+            context: ./docker/8.5
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
-                PHP_EXTENSIONS: 'gmp'
-        image: 'sail-8.5/app'
+                PHP_EXTENSIONS: gmp
+        image: sail-8.5/app
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         ports:
@@ -24,6 +24,7 @@ services:
             - sail
         depends_on:
             - mysql
+            - redis
     mysql:
         image: 'mysql:8.4'
         ports:
@@ -49,9 +50,37 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sail-redis:/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+    queue:
+        image: sail-8.5/app
+        working_dir: /var/www/html
+        command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=60
+        restart: unless-stopped
+        volumes:
+            - '.:/var/www/html'
+        depends_on:
+            - redis
+            - mysql
 networks:
     sail:
         driver: bridge
 volumes:
     sail-mysql:
         driver: local
+    sail-redis:
+        driver: local
+    
