@@ -11,7 +11,8 @@ class Task extends Model
     use HasFactory;
     protected $fillable = [
         'title',
-        'completed'
+        'completed',
+        'attachment_path'
     ];
 
     protected function casts(): array
