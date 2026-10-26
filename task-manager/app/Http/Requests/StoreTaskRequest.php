@@ -28,6 +28,12 @@ class StoreTaskRequest extends FormRequest
                 'required',
                 'string',
                 'max:255'
+            ],
+            'attachment' => [
+                'nullable',
+                'file',
+                'mimes:pdf,jpg,jpeg,png,doc,docx',
+                'max:5120'
             ]
         ];
     }

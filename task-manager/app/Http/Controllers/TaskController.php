@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 
@@ -63,9 +64,21 @@ class TaskController extends Controller
     public function store(StoreTaskRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $task = $request->user()
-            ->tasks()
-            ->create($validated);
+        $attachmentPath = $request->file('attachment')?->store('task-attachment', 'local');
+        try {
+            $task = $request->user()
+                ->tasks()
+                ->create([
+                    'title' => $validated['title'],
+                    'attachment_path' => $attachmentPath
+                ]);
+        } catch (\Throwable $exception) {
+            if ($attachmentPath !== null) {
+                Storage::disk('local')->delete($attachmentPath);
+            }
+            throw $exception;
+        }
+
         $this->clearSummaryCache($request->user()->id);
         ProcessTaskCreated::dispatch($task)->afterCommit();
         return redirect('/tasks')->with('status', 'Task created successfully.');
@@ -90,7 +103,24 @@ class TaskController extends Controller
     }
     public function delete(Task $task): RedirectResponse
     {
+        $path = $task->attachment_path;
         $task->delete();
+        if ($path) {
+            Storage::disk('local')->delete($path);
+        }
+
         return redirect()->route('tasks.index')->with('status', 'Task deleted successfully.');
+    }
+
+    public function downloadAttachment(Task $task): mixed
+    {
+        abort_if(!$task->attachment_path || ! Storage::disk('local')->exists($task->attachment_path), 404);
+
+        $extension = pathinfo($task->attachment_path, PATHINFO_EXTENSION);
+        $downloadName = 'task-' . $task->id . '-attachment' . ($extension !== '' ? '.' . $extension : '');
+        return Storage::disk('local')->download(
+            $task->attachment_path,
+            $downloadName
+        );
     }
 }

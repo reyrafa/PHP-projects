@@ -63,4 +63,14 @@ class TaskPolicy
     {
         return false;
     }
+
+    public function downloadAttachment(User $user, Task $task): bool
+    {
+        return $user->id === $task->user_id;
+    }
+
+    public function deleteAttachment(User $user, Task $task): bool
+    {
+        return $user->id === $task->user_id;
+    }
 }
