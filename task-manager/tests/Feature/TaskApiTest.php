@@ -62,4 +62,28 @@ class TaskApiTest extends TestCase
 
         $this->assertDatabaseCount('tasks', 0);
     }
+
+    public function test_task_api_only_returns_only_the_expected_fields(): void
+    {
+        $user = User::factory()->create();
+        $user->tasks()->create([
+            'title' => 'Learn Laravel'
+        ]);
+        Sanctum::actingAs($user);
+        $this->getJson('/api/tasks')
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    [
+                        'id',
+                        'title',
+                        'completed',
+                        'has_attachment',
+                        'created_at'
+                    ],
+                ],
+                'links',
+                'meta'
+            ]);
+    }
 }
