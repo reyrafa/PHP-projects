@@ -19,6 +19,15 @@
                 @else
                     - Pending
                 @endif
+                @if ($task->attachment_path)
+                    <p>
+                        Attachment:
+
+                        <a href="{{ route('tasks.attachment.download', $task) }}">
+                            Download attachment
+                        </a>
+                    </p>
+                @endif
             </li>
         @endforeach
 
