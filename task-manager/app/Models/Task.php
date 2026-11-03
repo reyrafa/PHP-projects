@@ -11,14 +11,17 @@ class Task extends Model
     use HasFactory;
     protected $fillable = [
         'title',
-        'completed',
+        'description',
+        'status',
+        'priority',
+        'due_date',
         'attachment_path'
     ];
 
     protected function casts(): array
     {
         return [
-            'completed' => 'boolean'
+            'due_date' => 'date'
         ];
     }
     public function user(): BelongsTo

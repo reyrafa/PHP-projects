@@ -20,7 +20,8 @@ class TaskFactory extends Factory
     {
         return [
             'title' => fake()->sentence(),
-            'completed' => fake()->boolean(),
+            'description' => fake()->sentences(2, true),
+            'priority' => fake()->randomElement(['low', 'medium', 'high'])
         ];
     }
 }

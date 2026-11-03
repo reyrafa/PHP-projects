@@ -25,6 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/tasks/{task}', [TaskController::class, 'delete'])
     ->can('delete', 'task')
     ->name('tasks.delete');
+
+    Route::get('/tasks/{task}/attachment', [TaskController::class, 'downloadAttachment'])
+    ->can('downloadAttachment', 'task')
+    ->name('tasks.attachment.download');
 });
 
 Route::middleware('guest')->group(function () {

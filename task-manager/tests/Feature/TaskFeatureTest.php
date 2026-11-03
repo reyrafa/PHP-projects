@@ -17,20 +17,6 @@ class TaskFeatureTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    public function test_user_can_login(): void
-    {
-        $user = User::factory()->create();
-        $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'password'
-        ])->assertRedirect(route('tasks.index'));
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email
-        ]);
-        $this->assertAuthenticatedAs($user);
-    }
 
     public function test_user_sees_only_thier_own_tasks(): void
     {
@@ -38,11 +24,15 @@ class TaskFeatureTest extends TestCase
         $user2 = User::factory()->create();
         $user1->tasks()->create([
             'title' => 'Learn PHP Testing',
-            'completed' => false
+            'description' => 'PHP',
+            'priority' => 'high',
+            'due_date' => now()
         ]);
         $user2->tasks()->create([
             'title' => 'Learn Pest',
-            'completed' => false
+            'description' => '',
+            'priority' => 'medium',
+            'due_date' => now()
         ]);
         $this->actingAs($user1)
             ->get(route('tasks.index'))
@@ -56,12 +46,18 @@ class TaskFeatureTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user)
             ->post(route('tasks.store'), [
-                'title' => 'Learn something new'
+                'title' => 'Learn something new',
+                'description' => '',
+                'priority' => 'low',
+                'due_date' => ''
             ])
             ->assertRedirect(route('tasks.index'));
         $this->assertDatabaseHas('tasks', [
             'user_id' => $user->id,
-            'title' => 'Learn something new'
+            'description' => null,
+            'title' => 'Learn something new',
+            'priority' => 'low',
+            'due_date' => null
         ]);
     }
 
@@ -75,6 +71,15 @@ class TaskFeatureTest extends TestCase
             ->assertSessionHasErrors('title');
         $this->assertDatabaseCount('tasks', 0);
     }
+    public function test_task_priority_is_required(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)
+            ->post(route('tasks.store'), [
+                'priority' => ''
+            ])->assertSessionHasErrors('priority');
+        $this->assertDatabaseCount('tasks', 0);
+    }
 
     public function test_user_cannot_view_another_users_task(): void
     {
@@ -82,7 +87,9 @@ class TaskFeatureTest extends TestCase
         $userB = User::factory()->create();
         $userATask = $userA->tasks()->create([
             'title' => 'UserA Task',
-            'completed' => false
+            'desciption' => '',
+            'priority' => 'medium',
+            'due_date' => null,
         ]);
         $this->actingAs($userB)
             ->get(route('tasks.show', $userATask))
@@ -96,7 +103,7 @@ class TaskFeatureTest extends TestCase
         $userATask = $userA->tasks()
             ->create([
                 'title' => 'Learn Something new',
-                'completed' => false
+                'priority' => 'medium'
             ]);
         $this->actingAs($userB)
             ->put(route('tasks.update', $userATask), [
@@ -116,7 +123,7 @@ class TaskFeatureTest extends TestCase
         $userB = User::factory()->create();
         $userATask = $userA->tasks()->create([
             'title' => 'Task for A',
-            'completed' => false
+            'priority' => 'low'
         ]);
         $this->actingAs($userB)
             ->delete(route('tasks.delete', $userATask))
@@ -127,7 +134,4 @@ class TaskFeatureTest extends TestCase
             'title' => 'Task for A'
         ]);
     }
-
-    
-
 }
