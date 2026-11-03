@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Resources\TaskResource;
 use Illuminate\Http\JsonResponse;
@@ -11,8 +12,9 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class TaskController extends Controller
 {
-    public function index(Request $request)
+    public function index(IndexTaskRequest $request)
     {
+        $request->validated();
         $tasks = $request->user()
             ->tasks()
             ->latest()

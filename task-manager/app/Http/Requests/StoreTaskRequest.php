@@ -34,6 +34,20 @@ class StoreTaskRequest extends FormRequest
                 'file',
                 'mimes:pdf,jpg,jpeg,png,doc,docx',
                 'max:5120'
+            ],
+            'priority' => [
+                'required',
+                'string',
+                'in:low,medium,high'
+            ],
+            'description' => [
+                'nullable',
+                'string',
+                'max:500'
+            ],
+            'due_date' => [
+                'nullable',
+                'date'
             ]
         ];
     }

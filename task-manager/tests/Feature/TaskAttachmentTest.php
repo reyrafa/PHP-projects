@@ -18,13 +18,15 @@ class TaskAttachmentTest extends TestCase
     {
         $user = User::factory()->create();
         $response = $this->actingAs($user)->post(route('tasks.store'), [
-            'title' => 'learn something'
+            'title' => 'learn something',
+            'priority' => 'low'
         ]);
         $response->assertRedirect(route('tasks.index'));
         $this->assertDatabaseHas('tasks', [
             'title' => 'learn something',
             'user_id' => $user->id,
-            'attachment_path' => null
+            'attachment_path' => null,
+            'priority' => 'low'
         ]);
     }
 
@@ -48,6 +50,7 @@ class TaskAttachmentTest extends TestCase
         );
         $this->actingAs($user)->post(route('tasks.store'), [
             'title' => 'Learn Something',
+            'priority' => 'low',
             'attachment' => $file
         ])->assertSessionHasNoErrors()->assertRedirect(route('tasks.index'));
         $task = Task::where('title', 'Learn Something')
@@ -65,6 +68,7 @@ class TaskAttachmentTest extends TestCase
         Storage::disk('local')->put($path, 'example private file');
         $task = $user1->tasks()->create([
             'title' => 'Example',
+            'priority' => 'low',
             'attachment_path' => $path
         ]);
         $this->actingAs($user2)->get(route('tasks.attachment.download', $task))

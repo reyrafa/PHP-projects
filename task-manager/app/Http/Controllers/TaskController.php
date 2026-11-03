@@ -34,10 +34,10 @@ class TaskController extends Controller
                     'total' => $user->tasks()->count(),
 
                     'completed' => $user->tasks()
-                        ->where('completed', true)->count(),
+                        ->where('status', 'done')->count(),
 
                     'pending' => $user->tasks()
-                        ->where('completed', false)->count(),
+                        ->where('status', 'todo')->count(),
                 ];
             }
         );
@@ -46,7 +46,8 @@ class TaskController extends Controller
         $tasks = $request->user()
             ->tasks()
             ->with('user')
-            ->where('completed', false)
+            ->where('status', 'todo')
+            ->orWhere('status', 'in_progress')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -70,6 +71,8 @@ class TaskController extends Controller
                 ->tasks()
                 ->create([
                     'title' => $validated['title'],
+                    'description' => $validated['description'] ?? null,
+                    'priority' => $validated['priority'],
                     'attachment_path' => $attachmentPath
                 ]);
         } catch (\Throwable $exception) {

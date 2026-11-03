@@ -43,11 +43,13 @@ class TaskApiTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
         $this->postJson('/api/tasks', [
-            'title' => 'Learn Java'
+            'title' => 'Learn Java',
+            'priority' => 'high'
         ])->assertCreated()->assertJsonPath('data.title', 'Learn Java');
         $this->assertDatabaseHas('tasks', [
             'user_id' => $user->id,
-            'title' => 'Learn Java'
+            'title' => 'Learn Java',
+            'priority' => 'high'
         ]);
     }
 
@@ -67,7 +69,10 @@ class TaskApiTest extends TestCase
     {
         $user = User::factory()->create();
         $user->tasks()->create([
-            'title' => 'Learn Laravel'
+            'title' => 'Learn Laravel',
+            'priority' => 'medium',
+            'description' => '',
+            'due_date' => now()
         ]);
         Sanctum::actingAs($user);
         $this->getJson('/api/tasks')
@@ -77,7 +82,8 @@ class TaskApiTest extends TestCase
                     [
                         'id',
                         'title',
-                        'completed',
+                        'due_date',
+                        'description',
                         'has_attachment',
                         'created_at'
                     ],
@@ -85,5 +91,14 @@ class TaskApiTest extends TestCase
                 'links',
                 'meta'
             ]);
+    }
+
+    public function test_search_can_be_omitted_or_null(): void
+    {
+        Sanctum::actingAs(User::factory()->create());
+
+        $this->getJson('/api/tasks')->assertOk();                 // omitted
+        $this->getJson('/api/tasks?search=')->assertOk();         // empty -> null
+        $this->getJson('/api/tasks?search=hello')->assertOk();    // value
     }
 }
